@@ -1,0 +1,47 @@
+﻿@model IDictionary<string, int>
+<div class="chart-container" style="position: relative; height:40vh; width:80vw">
+    <canvas id="employeeRankChart"></canvas>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document.getElementById('employeeRankChart').getContext('2d');
+        var chartData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+        var labels = Object.keys(chartData);
+        var values = Object.values(chartData);
+
+        // Prepare chart data
+        new Chart(ctx, {
+            type: 'bar', // Chart type (use 'bar' for rank distribution)
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: values,
+                    data: 'Number of Employees',
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 1, // Ensure the y-axis starts from 1 (minimum rank)
+                        max: 10, // Limit the y-axis to 10 (maximum rank)
+                        ticks: {
+                            stepSize: 1, // Step size for y-axis (1 to 10)
+                            callback: function(value) {
+                                // Display integer values only
+                                if (Math.floor(value) === value) {
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>

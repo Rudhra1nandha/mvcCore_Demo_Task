@@ -1,0 +1,35 @@
+﻿@model Dictionary<string, int> 
+<!-- Model contains rank as key and count as value -->
+
+<div class="container mt-5">
+    <h3 class="text-center">Employee Rank Distribution</h3>
+    <canvas id="employeeRankChart" width="400" height="200"></canvas>
+
+    <script>
+        // Prepare data for the chart
+        var rankLabels = @Html.Raw(Json.Serialize(Model.Keys)); // Ranks
+        var rankData = @Html.Raw(Json.Serialize(Model.Values)); // Counts
+
+        var ctx = document.getElementById('employeeRankChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar', // Chart type
+            data: {
+                labels: rankLabels,
+                datasets: [{
+                    label: 'Number of Employees',
+                    data: rankData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</div>

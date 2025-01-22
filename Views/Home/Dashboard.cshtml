@@ -1,0 +1,130 @@
+﻿@model IEnumerable<mvccore_dotnet_app.Models.UserRole>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Users Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Dashboard</h2>
+
+        @* Adding excel and pdf downloading method *@
+        @* installl  EPPlus for excel *@
+        @* installl-----------itext7-------------for pdf *@
+
+        <div class="d-flex justify-content-end mb-3">
+            <a href="@Url.Action("ExportToExcel", "Home", new { role = ViewBag.Role })" class="btn btn-success me-2">Export to Excel</a>
+            <button id="exportToPdf" class="btn btn-danger">Export to PDF</button> &nbsp;&nbsp;
+            @*------------ to upload a excel file -------------------------*@
+            <form asp-action="UploadExcel" asp-controller="Home" enctype="multipart/form-data" method="post">
+                <input type="file" name="file" class="form-control me-2" accept=".xls,.xlsx" required />
+                <button type="submit" class="btn btn-primary">Upload Excel</button>
+            </form>
+        </div> 
+
+        <table class="table table-bordered table-striped mt-4" id="dataTable">
+            <thead class="table-primary">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Mobile No</th>
+                    <th>Role</th>
+                    <th>Rank</th>
+                    <th>Date of Birth</th>
+                    <th>Native Place</th>
+                    <th>Pincode</th>
+
+                    @* Adding Actions only for the admin users *@
+                    @if (ViewBag.Role == "Admin")
+                    {
+                        <th>Actions</th>
+                    }
+                    @* Adding Actions only for the admin users End *@
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.id</td>
+                        <td>@user.UserName</td>
+                        <td>@user.Email</td>
+                        <td>@user.Phone</td>
+                        <td>@user.Role</td>
+                        <td>@user.Rank</td>
+                        <td>@user.DateOfBirth</td>
+                        <td>@user.Native</td>
+                        <td>@user.Pincode</td>
+
+                        @* Adding Actions only for the admin users *@
+                        @if (ViewBag.Role == "Admin")
+                        {
+                            <td>
+                                <a href="/Home/Edit/@user.id" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="/Home/Delete/@user.id" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                            </td>
+                        }
+                        @* Adding Actions only for the admin users End *@
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-5">
+        @* <h3 class="text-center">Employee Rank Distribution</h3> *@
+        @Html.Partial("_EmployeeRankChart", ViewData["EmployeeRankDistribution"])
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // PDF Export Functionality using jsPDF
+        $("#exportToPdf").click(function () {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add Title
+            doc.setFontSize(16); // Smaller title font size
+            doc.setFont("helvetica", "bold");
+            doc.text("User Dashboard", 20, 20);
+
+            // Extract Table Data
+            const table = $("#dataTable");
+            let rowIndex = 30; // Starting y position for the table
+
+            // Adding table headers with bold font and smaller font size
+            table.find("thead tr th").each(function (index, th) {
+                doc.setFont("helvetica", "bold"); // Make headers bold
+                doc.setFontSize(6); // Set much smaller font size for headers
+                doc.text($(th).text(), 8 + index * 15, rowIndex); // Adjusted column spacing
+            });
+
+            rowIndex += 5; // Move to the next row for table data
+
+            // Adding table data with normal font and much smaller font size
+            table.find("tbody tr").each(function (index, tr) {
+                $(tr).find("td").each(function (i, td) {
+                    doc.setFont("helvetica", "normal"); // Set to normal font for table data
+                    doc.setFontSize(5); // Much smaller font size for data
+                    doc.text($(td).text(), 8 + i * 15, rowIndex); // Adjusted column spacing
+                });
+                rowIndex += 5; // Move to next row with compact height
+            });
+
+            // Save the PDF
+            doc.save('UsersDashboard.pdf');
+        });
+    </script>
+
+
+
+</body>
+</html>
